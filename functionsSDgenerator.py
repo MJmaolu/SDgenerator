@@ -623,10 +623,3 @@ def concatenate_fastq(df, N, len_reads, len_wt, proportion_wt, name,
     # Writing a unique fq with all the individual fastqs:
     os.system('cat {} > {}'.format(fq_list2command, name_final_fq))
 
-
-
-
-
-    
-
-
