@@ -5,7 +5,7 @@
   <h3 align="center">SDgenerator</h3>
 
   <p align="center">
-    SDgenerator is a simply program to simulate a FASTQ product of 'sequencing' a sample conform of a wild type virus and a known population of DVGs. 
+    SDgenerator is a simply program to simulate a FASTQ, the product of 'sequencing' a sample conformed of a wild type virus and a known population of DVGs. 
     <br />
   </p>
 </p>
