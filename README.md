@@ -85,8 +85,6 @@ To get a local copy up and running follow these simple steps.
 María José Olmo-Uceda - maolu@alumni.uv.es
 PhD student
 
-*EvolSysVir Group*
-
-I^2SysBio (CSIC-UV)
+*EvolSysVir Group*, $I^2SysBio$ (CSIC-UV)
 
 <!-- MARKDOWN LINKS & IMAGES -->
