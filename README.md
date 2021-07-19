@@ -91,7 +91,12 @@ BP,RI,DVG_type,proportion
 9478,9489,3cb/sb,0.1       
 10000,9800,5cb/sb,0.1        
 2200,2100,Insertion_forward,0.1     
-1000,1200,Insertion_reverse,0.1      
+1000,1200,Insertion_reverse,0.1
+
+The proportion of the wild type genome is calculated as 
+\[
+\1 - sum_{i=1}dvg_{prop}^{i}
+\]
 
 ### Supported DVG types 
 
