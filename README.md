@@ -19,7 +19,7 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#built-with">External Program</a></li>
       </ul>
     </li>
     <li>
@@ -35,8 +35,8 @@
   </ol>
 </details>
 
-<!-- BUILT WITH -->
-## Built with
+<!-- EXTERNAL PROGRAM -->
+## Third party program
 
 `wgsim` reads simulator <https://github.com/lh3/wgsim>
   
