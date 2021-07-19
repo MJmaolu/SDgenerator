@@ -1,0 +1,15 @@
+name: sdgenerator_env
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python = 3.9.5
+  - wgsim
+  - pandas = 1.2.4
+  - numpy = 1.19.5
+  - pyfastx = 0.8.3
+  - scipy = 1.6.3
+  - biopython = 1.79
