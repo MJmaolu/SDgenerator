@@ -95,7 +95,7 @@ BP,RI,DVG_type,proportion
 
 The proportion of the wild type genome is calculated as
 
-$1-\sum dvg_{prop}^{i}$
+$1-\sum{dvg_{prop}^{i}}$
 
 ### Supported DVG types 
 
