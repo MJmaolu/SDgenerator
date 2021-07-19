@@ -37,8 +37,8 @@
 
 <!-- BUILT WITH -->
 ## Built with
-### wgsim for reads simula
- 
+
+`wgsim` reads simulator <https://github.com/lh3/wgsim>
   
 
 <!-- GETTING STARTED -->
