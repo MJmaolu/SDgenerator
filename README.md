@@ -93,17 +93,17 @@ BP,RI,DVG_type,proportion
 
 ### Supported DVG types 
 
-Deletion_forward
+- Deletion_forward
 
-Deletion_reverse
+- Deletion_reverse
 
-3cb/sb
+- 3cb/sb
 
-5cb/sb
+- 5cb/sb
 
-Insertion_forward
+- Insertion_forward
 
-Insertion_reverse
+- Insertion_reverse
 
 <!-- CONTACT -->
 ## Contact
