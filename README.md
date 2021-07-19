@@ -78,6 +78,27 @@ To get a local copy up and running follow these simple steps.
 
 ```python3 SDgenerator.py -t population_csv -N number_total_reads [-l length_reads. Default 100] -o output_basename [-d outer_distance. Default 300]```
 
+<!-- INPUT FORMATS -->
+## Input formats
+
+### Population_csv example
+
+BP,RI,DVG_type,proportion
+6194,8961,Deletion_forward,0.1
+23000,120,Deletion_reverse,0.1
+9478,9489,3cb/sb,0.1
+10000,9800,5cb/sb,0.1
+2200,2100,Insertion_forward,0.1
+1000,1200,Insertion_reverse,0.1
+
+### Supported DVG types 
+
+Deletion_forward
+Deletion_reverse
+3cb/sb
+5cb/sb
+Insertion_forward
+Insertion_reverse
 
 <!-- CONTACT -->
 ## Contact
