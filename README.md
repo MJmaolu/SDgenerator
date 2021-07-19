@@ -38,7 +38,9 @@
 <!-- EXTERNAL PROGRAM -->
 ## Third party program
 
-`wgsim` reads simulator <https://github.com/lh3/wgsim>
+`wgsim` (reads simulator)
+
+<https://github.com/lh3/wgsim>
   
 
 <!-- GETTING STARTED -->
