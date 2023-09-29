@@ -24,7 +24,6 @@ import pandas as pd
 import numpy as np
 
 
-
 #------------------------------------------------------------------------------
 ## Parsear argumentos de entrada
 #------------------------------------------------------------------------------
@@ -224,65 +223,92 @@ def prop_per_len(prop, length):
     """
     return prop * length
 
-def depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt):
-    """
-    Calcula el valor de cobertura media que tendrá el dataset en una región en 
-    la que estén presentes todos los genomas
-    """
-    # product prop * length of each dvg
-    dvg_proxlen = df.apply(lambda row : prop_per_len(row['proportion'], 
-                row['length_dvg']), axis=1)
-    # summatory of the products prop * length of all dvgs
-    sum_dvg_proxlen = sum(dvg_proxlen)
+# def depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt):
+#     """
+#     Calcula el valor de cobertura media que tendrá el dataset en una región en 
+#     la que estén presentes todos los genomas
+#     """
+#     # product prop * length of each dvg
+#     dvg_proxlen = df.apply(lambda row : prop_per_len(row['proportion'], 
+#                 row['length_dvg']), axis=1)
+#     # summatory of the products prop * length of all dvgs
+#     sum_dvg_proxlen = sum(dvg_proxlen)
 
-    depth_common = (N * len_reads)/((proportion_wt * len_wt) + sum_dvg_proxlen)
+#     depth_common = (N * len_reads)/((proportion_wt * len_wt) + sum_dvg_proxlen)
 
-    return depth_common
+#     return depth_common
 
-def calc_N_dvg(prop, depth_common, len_dvg, len_reads):
+# def calc_N_dvg(prop, depth_common, len_dvg, len_reads):
+#     """
+#     Calcula el número aproximado de reads (N_dvg) con el que se generarán los
+#     fq simulados de los genotipos individuales. Redondearemos al alza el valor
+#     por lo que el N_total_real será aproximado al N introducido como parámetro.
+
+#     Args:
+#         prop    (float) [in]    Proporción que representa el genoma en una 
+#                                 región común
+#         N   (int)   [in]    Número de reads totales introducidas como parámetro
+#         len_reads   (int)   [in]    Longitud de las reads, introducido como 
+#                                 argumento
+#         len_wt  (int)   [in]    Longitud del genoma de referencia
+
+#     Returns:
+#         N_dvg   (int)   [out]   Número de reads con las que generar el fq
+#                                 simulado para que se ajuste a las proporciones
+#                                 introducidas como argumento
+#     """
+    
+#     N = (prop * depth_common * len_dvg)/len_reads
+
+#     return round(N)
+
+
+# def add_N_dvgs(df, N, len_reads, len_wt, proportion_wt):
+#     """
+#     Añade al df una columna con el número de reads a generar de cada genoma
+#     Args:
+#         df  (pd.DataFrame)  [in]    Dataframe accesible
+#         N   (int)   [in]    Número aproximado de reads con las que se va a 
+#                             generar el dataset. Argumento de entrada.
+#         len_reads   (int)   [in]    Longitud de las reads. Argumento de entrada.
+#         len_wt  (int)   [in]    Longitud del genoma de referencia o wt
+        
+#     Returns:
+#         df  (pd.DataFrame)  [out]   Tabla con la columna de N_dvg añadida
+#     """
+
+#     depth_common = depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt)
+
+#     df[['N_dvg']] = df.apply(lambda row : calc_N_dvg(row['proportion'],
+#              depth_common, row['length_dvg'], len_reads), axis=1)
+    
+#     return df
+
+
+def calc_N_dvg(df, N, len_reads):
     """
     Calcula el número aproximado de reads (N_dvg) con el que se generarán los
     fq simulados de los genotipos individuales. Redondearemos al alza el valor
     por lo que el N_total_real será aproximado al N introducido como parámetro.
 
     Args:
-        prop    (float) [in]    Proporción que representa el genoma en una 
-                                región común
-        N   (int)   [in]    Número de reads totales introducidas como parámetro
-        len_reads   (int)   [in]    Longitud de las reads, introducido como 
-                                argumento
-        len_wt  (int)   [in]    Longitud del genoma de referencia
 
     Returns:
-        N_dvg   (int)   [out]   Número de reads con las que generar el fq
-                                simulado para que se ajuste a las proporciones
-                                introducidas como argumento
+
     """
     
-    N = (prop * depth_common * len_dvg)/len_reads
+    # 1) Calcular nT (num total de genomas)
+    #   nT = len_reads*N/sum(df.prop*df.len)
+    # 2) Calcular arrays independientes para ni y Ni
+    #    for i = 1:N_DVGs
+    #       n(i) = df.prop(i)*nT
+    #       N(i) = N*df.prop(i)*df.len(i)/sum(df.prop*df.len)
+    #       # or N(i) = n(i)*df.len(i)/len_reads
+    #    end
+    # 3) Añadir las nuevas columnas al dataframe
 
-    return round(N)
 
-def add_N_dvgs(df, N, len_reads, len_wt, proportion_wt):
-    """
-    Añade al df una columna con el número de reads a generar de cada genoma
-    Args:
-        df  (pd.DataFrame)  [in]    Dataframe accesible
-        N   (int)   [in]    Número aproximado de reads con las que se va a 
-                            generar el dataset. Argumento de entrada.
-        len_reads   (int)   [in]    Longitud de las reads. Argumento de entrada.
-        len_wt  (int)   [in]    Longitud del genoma de referencia o wt
-        
-    Returns:
-        df  (pd.DataFrame)  [out]   Tabla con la columna de N_dvg añadida
-    """
-
-    depth_common = depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt)
-
-    df[['N_dvg']] = df.apply(lambda row : calc_N_dvg(row['proportion'],
-             depth_common, row['length_dvg'], len_reads), axis=1)
-    
-    return df
+    return round(df)
 
 
 #------------------------------------------------------------------------------
