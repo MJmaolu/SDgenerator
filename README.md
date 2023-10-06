@@ -2,10 +2,12 @@
 <br />
 <p align="center">
 
-  <h3 align="center">SDgenerator</h3>
-
+  <h3 align="center">SDgenerator v2</h3>
   <p align="center">
-    SDgenerator is a simple program to simulate a FASTQ, the product of 'sequencing' a sample conformed of a wild type virus and a known population of DVGs. 
+    SDgenerator is a python program to create synthetic samples (in FASTQ format) with a controled population of DVGs (proportion & type) 
+    
+The version 2 consider the case that all the genomes in the sample doesn't share a common genomic coordinate. The way to make the v2 calculation was carried by @jmusan
+    
     <br />
   </p>
 </p>

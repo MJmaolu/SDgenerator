@@ -1,17 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-## functionsSDgenerator.py
+## functionsSDgenerator_v2.py
 ###############################################################################
-##                        Funciones para SDgenerator
-##  Generación de muestras sintéticas (en formato FASTQ) compuestas por una 
-##  población definida de DVGs (en tipo y proporciones)
+##                        SDgenerator functions
+##  SDgenerator is a python program to create synthetic samples (in FASTQ format) 
+## with a controled population of DVGs (proportion & type)
 ## 
 ###############################################################################
-## Author: Maria Jose Olmo-Uceda
-## Version: 1.0
-## Email: maolu@alumni.uv.es
-## Date: 2021/04/21
+## Authors: Maria Jose Olmo-Uceda & Juan Carlos Muñoz-Sánchez
+## Version: 2.0
+
+## The version 2 consider the case that all the genomes in the sample doesn't 
+## share a common genomic coordinate. 
+## The way to make the calculation independent was carried by JC M-S
+##
+## The functions 'depth_common_coord_total', 'calc_N_dvg' and 'add_N_dvgs' has being
+## changed for 'calc_Ni'
+## Email: maolu@alumni.uv.es, ...
+## Date: 2023/10/23
 ###############################################################################
 
 import os
@@ -22,7 +29,6 @@ import datetime
 # Third party imports 
 import pandas as pd
 import numpy as np
-
 
 
 #------------------------------------------------------------------------------
@@ -96,7 +102,6 @@ def read_arguments():
 
     return input_csv, reference, N, len_reads, name, outer_distance, \
             keep_individuals
-
 
 #------------------------------------------------------------------------------
 ## Cálculo de la longitud teórica de los DVGs y del número de reads a generar
@@ -210,80 +215,77 @@ def prop_wt(df):
         df  (pd.DataFrame)  [in]    Dataframe accesible
 
     Returns:
-        prop_wt (float) [out]   Proporción en la que se encuentra el wt en una
+        proportion_wt (float) [out]   Proporción en la que se encuentra el wt en una
                                 región común a todos los genomas del dataset
     """
     
-    prop_wt = 1 - sum(df['proportion'])
+    proportion_wt = 1 - sum(df['proportion'])
 
-    return prop_wt
+    return proportion_wt
+
 
 def prop_per_len(prop, length):
     """
-    Calcula el producto entre proporción y longitud del genoma
+    Product between proportion and length 
     """
     return prop * length
 
-def depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt):
+def calc_Ni(df, N, proportion_wt, len_wt):
     """
-    Calcula el valor de cobertura media que tendrá el dataset en una región en 
-    la que estén presentes todos los genomas
-    """
-    # product prop * length of each dvg
-    dvg_proxlen = df.apply(lambda row : prop_per_len(row['proportion'], 
-                row['length_dvg']), axis=1)
-    # summatory of the products prop * length of all dvgs
-    sum_dvg_proxlen = sum(dvg_proxlen)
-
-    depth_common = (N * len_reads)/((proportion_wt * len_wt) + sum_dvg_proxlen)
-
-    return depth_common
-
-def calc_N_dvg(prop, depth_common, len_dvg, len_reads):
-    """
-    Calcula el número aproximado de reads (N_dvg) con el que se generarán los
-    fq simulados de los genotipos individuales. Redondearemos al alza el valor
-    por lo que el N_total_real será aproximado al N introducido como parámetro.
-
+    Calculate the number of reads (Ni) necessary to cover each genome i (gi)
     Args:
-        prop    (float) [in]    Proporción que representa el genoma en una 
-                                región común
-        N   (int)   [in]    Número de reads totales introducidas como parámetro
-        len_reads   (int)   [in]    Longitud de las reads, introducido como 
-                                argumento
-        len_wt  (int)   [in]    Longitud del genoma de referencia
+        df  (pandas.dataFrame)  
 
-    Returns:
-        N_dvg   (int)   [out]   Número de reads con las que generar el fq
-                                simulado para que se ajuste a las proporciones
-                                introducidas como argumento
     """
-    
-    N = (prop * depth_common * len_dvg)/len_reads
-
-    return round(N)
-
-def add_N_dvgs(df, N, len_reads, len_wt, proportion_wt):
-    """
-    Añade al df una columna con el número de reads a generar de cada genoma
-    Args:
-        df  (pd.DataFrame)  [in]    Dataframe accesible
-        N   (int)   [in]    Número aproximado de reads con las que se va a 
-                            generar el dataset. Argumento de entrada.
-        len_reads   (int)   [in]    Longitud de las reads. Argumento de entrada.
-        len_wt  (int)   [in]    Longitud del genoma de referencia o wt
-        
-    Returns:
-        df  (pd.DataFrame)  [out]   Tabla con la columna de N_dvg añadida
-    """
-
-    depth_common = depth_common_coord_total(df, N, len_reads, len_wt, proportion_wt)
-
-    df[['N_dvg']] = df.apply(lambda row : calc_N_dvg(row['proportion'],
-             depth_common, row['length_dvg'], len_reads), axis=1)
-    
+    # Calculate pili and add a column
+    df[['pili']] = df.apply(lambda row: prop_per_len(row['proportion'],
+                                                     row['length_dvg']),
+                                                     axis = 1)
+    # pili WT
+    pili_wt = prop_per_len(proportion_wt, len_wt)
+    # pili summatory (WT included)
+    sumPili = df[['pili']].sum(axis=0) + pili_wt
+    # Add Ni as a new column
+    df[['Ni']] = df.apply(lambda row: round(N * row['pili'] / sumPili),
+                          axis = 1)    
     return df
 
+def calc_ni(df, L):
+    """
+    Calculate the number of complete genomes of each type (ni) are in the 
+    sample
+    Args:
+        df  (pandas.DataFrame)  
+        L   (int)   Length of the reads
+    """
+    df[['ni']] = df.apply(lambda row: round(row['Ni'] * L / row['length_dvg']),
+                          axis = 1)
+
+    return df
+
+def create_df_with_wt(df, len_wt, proportion_wt, N, len_read):
+    """
+    Create a copy of the data to add the WT information. Only for be written.
+    """
+    df_with_wt = df.copy(deep=True)
+    # Calculate wt parameters
+    pili_wt = prop_per_len(proportion_wt, len_wt)
+    sumPili = float(df[['pili']].sum(axis=0) + pili_wt)
+    Ni_wt = round(N * pili_wt / sumPili)
+    ni_wt = round(Ni_wt * len_read / len_wt)
+    # combine the wt info
+    wt_info = {'BP': "-",
+               'RI': "-",
+               'DVG_type': "WT",
+               'proportion': proportion_wt,
+               'length_dvg': len_wt,
+               'pili': pili_wt,
+               'Ni': Ni_wt,
+               'ni': ni_wt}
+    
+    df_with_wt.loc[len(df_with_wt)] = wt_info
+
+    return df_with_wt
 
 #------------------------------------------------------------------------------
 ## Generación de los fasta de cada dvg
@@ -500,10 +502,10 @@ def simulation_illumina_sequencing_wgsim(name, BP, RI, DVG_type, N, len_reads,
 def generate_simulations(name, df, len_reads, outer_distance):
     """
     Genera las simulaciones de todos los dvgs presentes en la tabla introducida
-    como input. El número de reads (N_dvg) vendrá determinado por el cálculo 
+    como input. El número de reads (Ni) vendrá determinado por el cálculo 
     realizado en el paso 1 del programa
     Args:
-        df  (pd.DataFrame)  [in]    Tabla anotada con la columna 'N_dvg' y
+        df  (pd.DataFrame)  [in]    Tabla anotada con la columna 'Ni' y
                                     accesible como pd.DataFrame
         len_reads   (int)   [in]    Longitud de las reads a generar
         outer_distance  (int)   Separación externa entre los dos finales de 
@@ -513,12 +515,12 @@ def generate_simulations(name, df, len_reads, outer_distance):
     """
     # simulations of each DVG event
     df.apply(lambda row : simulation_illumina_sequencing_wgsim(name, row['BP'], 
-                    row['RI'], row['DVG_type'], row['N_dvg'], len_reads, 
+                    row['RI'], row['DVG_type'], row['Ni'], len_reads, 
                                         outer_distance), axis=1)
     # simulation of the native genome in the correct proportion
     
  
-def simulation_wt(name, df, reference, N, len_reads, len_wt, proportion_wt, 
+def simulation_wt(name, reference, N, df_with_wt, len_reads, len_wt, proportion_wt, 
                 outer_distance):
     """
     Lanza la simulación del genoma nativo con el número de reads 
@@ -534,11 +536,7 @@ def simulation_wt(name, df, reference, N, len_reads, len_wt, proportion_wt,
         outer_distance
     """
     dir_wt = "Outputs/fastqs/" + name + "/"
-    depth_common = depth_common_coord_total(df, N, len_reads, len_wt, 
-                    proportion_wt)
-    N_wt = calc_N_dvg(proportion_wt, depth_common, len_wt, len_reads)
-
-
+    N_wt = df_with_wt.loc[df_with_wt['DVG_type'] == "WT"]['Ni'].values[0]
 
     # establecemos en 0 las variables relacionadas con generación de mutación, 
     # error o indels. 
@@ -578,7 +576,7 @@ def list_fastqs(df, name, N_wt, as_single_end=True):
         end = ['_1.fq', '_2.fq']
     
     basename_list = list(df['basename_files'])
-    N_list = list(df['N_dvg'])
+    N_list = list(df['Ni'])
     fq_list = []
     # Add {basename}_1.fq to the list
     for basename in basename_list:
@@ -595,7 +593,7 @@ def list_fastqs(df, name, N_wt, as_single_end=True):
     return fq_list
 
 
-def concatenate_fastq(df, N, len_reads, len_wt, proportion_wt, name,
+def concatenate_fastq(df, df_with_wt, N, len_reads, len_wt, proportion_wt, name,
                      as_single_end=True):
     """
     Escribe en un único fichero fastq ({name}.fq) todas las reads generadas en 
@@ -611,9 +609,8 @@ def concatenate_fastq(df, N, len_reads, len_wt, proportion_wt, name,
     """
 
     name_final_fq = "Outputs/" + name + '.fq'
-    depth_common = depth_common_coord_total(df, N, len_reads, len_wt, 
-                    proportion_wt)
-    N_wt = calc_N_dvg(proportion_wt, depth_common, len_wt, len_reads)
+    
+    N_wt = df_with_wt.loc[df_with_wt['DVG_type'] == "WT"]['Ni'].values[0]
 
     # Extracting the list of fq to concatenate
     fq_list = list_fastqs(df, name, N_wt, as_single_end=True)
@@ -622,4 +619,3 @@ def concatenate_fastq(df, N, len_reads, len_wt, proportion_wt, name,
 
     # Writing a unique fq with all the individual fastqs:
     os.system('cat {} > {}'.format(fq_list2command, name_final_fq))
-
