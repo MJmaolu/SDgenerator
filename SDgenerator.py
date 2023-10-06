@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
-##                               SDgenerator
-##  Generación de muestras sintéticas (en formato FASTQ) compuestas por una 
-##  población definida de DVGs (en tipo y proporciones)
+##                               SDgenerator_v2
+##  SDgenerator is a python program to create synthetic samples (in FASTQ format) 
+## with a controled population of DVGs (proportion & type)
 ## 
 ###############################################################################
-## Author: Maria Jose Olmo-Uceda
-## Version: 1.0
-## Email: maolu@alumni.uv.es
-## Date: 2021/04/21
+## The version 2 consider the case that all the genomes in the sample doesn't 
+## share a common genomic coordinate. 
+## The way to make the calculation independent was carried by JC M-S
 ###############################################################################
-
-
+## Author: Maria Jose Olmo-Uceda & Juan Carlos Muñoz-Sánchez
+## Version: 2.0
+## Email: maolu@alumni.uv.es
+## Date: 2023/10/06
+###############################################################################
 """
 Objetivo: generar un dataset simulado que contenga el conjunto de genomas 
         compuesto por el genoma wt y los dvgs especificados en las proporciones
@@ -49,7 +51,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 
 
-import functionsSDgenerator as my
+import functionsSDgenerator_v2 as my
 
 def main():
     t0 = time.time()
@@ -81,16 +83,19 @@ def main():
     # proportion of the wt genome
     proportion_wt = my.prop_wt(df)
 
-    ## Calculate the N_dvg and write the information estracted in a new csv
-    df = my.add_N_dvgs(df, N, len_reads, len_wt, proportion_wt)
-    
+    ## Calculate the rounded number of each genome (Ni) to generate 
+    df = my.calc_Ni(df, N, proportion_wt, len_wt)
 
+    ## Calculate the number of complete genomes of each type (ni) in the sample
+    df = my.calc_ni(df, len_reads)
+    
     ## Generate de basename of each event to facilitate the posterior naming
     ## of the individual files
     df = my.add_basename_dvg_files(df)
 
-    # Save the anotated table
-    df.to_csv(composition_table, index=0)
+    df_w_wt = my.create_df_with_wt(df, len_wt, proportion_wt, N, len_reads)
+    # Save the anotated table (include the WT info)
+    df_w_wt.to_csv(composition_table, index=0)
 
     ## In case doesn't exist, create the directory Outputs/fastas
     if 'Outputs' not in os.listdir():
@@ -121,15 +126,15 @@ def main():
                                                     outer_distance))
 
     ## Generate wt simulation
-    my.simulation_wt(name, df, reference, N, len_reads, len_wt, proportion_wt, 
-                    outer_distance)
+    my.simulation_wt(name, reference, N, df_w_wt, len_reads, len_wt, 
+                     proportion_wt, outer_distance)
     
     #--------------------------------------------------------------------------
     ## Generación de un único fichero fq con las reads de todos los genomas
     #--------------------------------------------------------------------------
     t3 = time.time()
     #my.concatenate_fastq(df, name)
-    my.concatenate_fastq(df, N, len_reads, len_wt, proportion_wt, name,
+    my.concatenate_fastq(df, df_w_wt, N, len_reads, len_wt, proportion_wt, name,
                      as_single_end=True)
 
     if not keep_individuals:
