@@ -8,7 +8,6 @@
     
 The version 2 consider the case that all the genomes in the sample doesn't share a common genomic coordinate. The way to make the v2 calculation was carried by @jmusan
     
-    <br />
   </p>
 </p>
 
