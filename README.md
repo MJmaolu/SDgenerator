@@ -6,7 +6,7 @@
   <p align="center">
     SDgenerator is a python program to create synthetic samples (in FASTQ format) with a controled population of DVGs (proportion & type) 
     
-The version 2 consider the case that all the genomes in the sample doesn't share a common genomic coordinate. The way to make the v2 calculation was carried by @jmusan
+The version 2 consider the case that all the genomes in the sample doesn't have to share a common genomic coordinate (@jmusan).
     
   </p>
 </p>
