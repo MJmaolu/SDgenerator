@@ -3,6 +3,8 @@
 <p align="center">
 
   <h3 align="center">SDgenerator v2</h3>
+  <p align="center"><a href="https://doi.org/10.5281/zenodo.23729798"><img src="https://zenodo.org/badge/360208382.svg" alt="DOI"></a>
+
   <p align="center">
     SDgenerator is a python program to create synthetic samples (in FASTQ format) with a controled population of DVGs (proportion & type) 
     
@@ -10,6 +12,7 @@ The version 2 consider the case that all the genomes in the sample doesn't have 
     
   </p>
 </p>
+
 
 
 
